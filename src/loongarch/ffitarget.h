@@ -65,7 +65,7 @@ typedef enum ffi_abi
 #else
 # error unsupported LoongArch floating-point ABI
 #endif
-#elif defined(__loongarch32)
+#elif defined(__loongarch32) || defined(__loongarch32r)
 # if defined(__loongarch_soft_float)
   FFI_DEFAULT_ABI = FFI_ILP32S
 # else
@@ -84,7 +84,7 @@ typedef enum ffi_abi
 #define FFI_GO_CLOSURES 1
 #if defined(__loongarch64)
 #define FFI_TRAMPOLINE_SIZE 24
-#elif defined(__loongarch32)
+#elif defined(__loongarch32) || defined(__loongarch32r)
 #define FFI_TRAMPOLINE_SIZE 20
 #else
 # error unsupported LoongArch base architecture
