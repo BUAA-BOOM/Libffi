@@ -55,6 +55,12 @@
 #error unsupported LoongArch floating-point ABI
 #endif
 
+#if __SIZEOF_POINTER__ == 8
+# define AADDI addi.d
+#else
+# define AADDI addi.w
+#endif
+
     .text
     .globl  ffi_call_asm
     .type   ffi_call_asm, @function
@@ -95,7 +101,7 @@ ffi_call_asm:
 	SARG	$ra, $a1, FRAME_LEN - 1*PTRS
 	.cfi_offset	1, -1*PTRS
 
-	addi.d	$fp, $a1, FRAME_LEN
+	AADDI	$fp, $a1, FRAME_LEN
 	move	$sp, $a0
 	.cfi_def_cfa	22, 0 # Our frame is fully set up.
 
@@ -136,7 +142,7 @@ ffi_call_asm:
 	SARG	$a1, $fp, -FRAME_LEN+8*FLTS+1*PTRS
 
 	/* Restore and return.  */
-	addi.d	$sp, $fp, -FRAME_LEN
+	AADDI	$sp, $fp, -FRAME_LEN
 	.cfi_def_cfa	3, FRAME_LEN
 	LARG	$ra, $fp, -1*PTRS
 	.cfi_restore	1
@@ -159,7 +165,7 @@ ffi_call_asm:
 
 ffi_closure_asm:
 	.cfi_startproc
-	addi.d	$sp, $sp, -FRAME_LEN
+	AADDI	$sp, $sp, -FRAME_LEN
 	.cfi_def_cfa_offset FRAME_LEN
 
 	/* Make a frame.  */
@@ -167,7 +173,7 @@ ffi_closure_asm:
 	.cfi_offset	22, -2*PTRS
 	SARG	$ra, $sp, FRAME_LEN - 1*PTRS
 	.cfi_offset	1, -1*PTRS
-	addi.d	$fp, $sp, FRAME_LEN
+	AADDI	$fp, $sp, FRAME_LEN
 
 	/* Save arguments.  */
 #if FLTS
@@ -194,7 +200,7 @@ ffi_closure_asm:
 	LARG	$a0, $t0, FFI_TRAMPOLINE_SIZE+0*PTRS
 	LARG	$a1, $t0, FFI_TRAMPOLINE_SIZE+1*PTRS
 	LARG	$a2, $t0, FFI_TRAMPOLINE_SIZE+2*PTRS
-	addi.d	$a3, $sp, FRAME_LEN
+	AADDI	$a3, $sp, FRAME_LEN
 	move	$a4, $sp
 
 	bl	ffi_closure_inner
@@ -213,7 +219,7 @@ ffi_closure_asm:
 	.cfi_restore	1
 	LARG	$fp, $sp, FRAME_LEN-2*PTRS
 	.cfi_restore	22
-	addi.d	$sp, $sp, FRAME_LEN
+	AADDI	$sp, $sp, FRAME_LEN
 	.cfi_def_cfa_offset 0
 	jr	$ra
 	.cfi_endproc
@@ -241,8 +247,8 @@ trampoline_code_table:
 
 	.rept	65536 / 16
 	pcaddu12i	$t1, 16 # 65536 >> 12
-	ld.d	$t0, $t1, 0
-	ld.d	$t1, $t1, 8
+	LARG	$t0, $t1, 0
+	LARG	$t1, $t1, PTRS
 	jirl	$zero, $t1, 0
 	.endr
 	.size	trampoline_code_table, .-trampoline_code_table
@@ -262,7 +268,7 @@ trampoline_code_table:
 
 ffi_go_closure_asm:
 	.cfi_startproc
-	addi.d	$sp, $sp, -FRAME_LEN
+	AADDI	$sp, $sp, -FRAME_LEN
 	.cfi_def_cfa_offset FRAME_LEN
 
 	/* Make a frame.  */
@@ -270,7 +276,7 @@ ffi_go_closure_asm:
 	.cfi_offset	22, -2*PTRS
 	SARG	$ra, $sp, FRAME_LEN - 1*PTRS
 	.cfi_offset	1, -1*PTRS
-	addi.d	$fp, $sp, FRAME_LEN
+	AADDI	$fp, $sp, FRAME_LEN
 
 	/* Save arguments.  */
 #if FLTS
@@ -297,7 +303,7 @@ ffi_go_closure_asm:
 	LARG	$a0, $t2, 1*PTRS
 	LARG	$a1, $t2, 2*PTRS
 	move	$a2, $t2
-	addi.d	$a3, $sp, FRAME_LEN
+	AADDI	$a3, $sp, FRAME_LEN
 	move	$a4, $sp
 
 	bl	ffi_closure_inner
@@ -316,7 +322,7 @@ ffi_go_closure_asm:
 	.cfi_restore	1
 	LARG	$fp, $sp, FRAME_LEN-2*PTRS
 	.cfi_restore	22
-	addi.d	$sp, $sp, FRAME_LEN
+	AADDI	$sp, $sp, FRAME_LEN
 	.cfi_def_cfa_offset 0
 	jr	$ra
 	.cfi_endproc

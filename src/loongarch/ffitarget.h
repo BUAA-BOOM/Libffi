@@ -47,6 +47,9 @@ typedef signed long ffi_sarg;
 typedef enum ffi_abi
 {
   FFI_FIRST_ABI = 0,
+  FFI_ILP32S,
+  FFI_ILP32F,
+  FFI_ILP32D,
   FFI_LP64S,
   FFI_LP64F,
   FFI_LP64D,
@@ -60,10 +63,16 @@ typedef enum ffi_abi
 #elif defined(__loongarch_double_float)
   FFI_DEFAULT_ABI = FFI_LP64D
 #else
-#error unsupported LoongArch floating-point ABI
+# error unsupported LoongArch floating-point ABI
 #endif
+#elif defined(__loongarch32)
+# if defined(__loongarch_soft_float)
+  FFI_DEFAULT_ABI = FFI_ILP32S
+# else
+#  error unsupported LoongArch floating-point ABI
+# endif
 #else
-#error unsupported LoongArch base architecture
+# error unsupported LoongArch base architecture
 #endif
 } ffi_abi;
 
@@ -73,7 +82,13 @@ typedef enum ffi_abi
 
 #define FFI_CLOSURES 1
 #define FFI_GO_CLOSURES 1
+#if defined(__loongarch64)
 #define FFI_TRAMPOLINE_SIZE 24
+#elif defined(__loongarch32)
+#define FFI_TRAMPOLINE_SIZE 20
+#else
+# error unsupported LoongArch base architecture
+#endif
 #define FFI_NATIVE_RAW_API 0
 #define FFI_EXTRA_CIF_FIELDS \
   unsigned loongarch_nfixedargs; \
