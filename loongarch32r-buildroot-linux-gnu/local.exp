@@ -1,0 +1,3 @@
+set CC_FOR_TARGET "/home/pigkiller/LoongArch/OS/buildroot/output/host/bin/loongarch32r-linux-gnusf-gcc"
+set CXX_FOR_TARGET "/home/pigkiller/LoongArch/OS/buildroot/output/host/bin/loongarch32r-linux-gnusf-g++"
+set compiler_vendor "gnu"
